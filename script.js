@@ -159,39 +159,69 @@ document.getElementById('audioGuideBtn').addEventListener('click', () => {
 
 // Voice Input
 document.getElementById('voiceInputBtn').addEventListener('click', () => {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.start();
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
 
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        let spokenExpression = transcript.toLowerCase()
-            .replace('plus', '+')
-            .replace('minus', '-')
-            .replace('multiply by', 'x')
-            .replace('times', 'x')
-            .replace('divide by', '÷')
-            .replace('divided by', '÷')
-            .replace('to the power of', '^')
-            .replace('pi', 'π')
-            .replace('euler\'s number', 'e')
-            .replace('left parenthesis', '(')
-            .replace('right parenthesis', ')')
-            .replace('square root', 'sqrt')
-            .replace('exponential', 'exp')
-            .replace('factorial', '!')
-            .replace('square', '^2');
+        recognition.start();
 
-        input.value = spokenExpression;
+        recognition.onstart = () => {
+            console.log('Speech recognition service has started');
+            speak('Please start speaking.');
+        };
 
-        if (transcript.includes('equals')) {
-            calculateExpression(input.value);
-        } else {
-            speak(spokenExpression);
-        }
-    };
+        recognition.onspeechstart = () => {
+            console.log('Speech has been detected');
+        };
 
-    recognition.onerror = (event) => {
-        speak('Sorry, I did not catch that. Please try again.');
-    };
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            console.log(`Transcript: ${transcript}`);
+            let spokenExpression = transcript.toLowerCase()
+                .replace('plus', '+')
+                .replace('minus', '-')
+                .replace('multiply by', 'x')
+                .replace('times', 'x')
+                .replace('divide by', '÷')
+                .replace('divided by', '÷')
+                .replace('to the power of', '^')
+                .replace('pi', 'π')
+                .replace('euler\'s number', 'e')
+                .replace('left parenthesis', '(')
+                .replace('right parenthesis', ')')
+                .replace('square root', 'sqrt')
+                .replace('exponential', 'exp')
+                .replace('factorial', '!')
+                .replace('square', '^2');
+
+            console.log(`Parsed Expression: ${spokenExpression}`);
+            input.value = spokenExpression;
+
+            if (transcript.includes('equals')) {
+                calculateExpression(input.value);
+            } else {
+                speak(spokenExpression);
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error('Speech Recognition Error:', event.error);
+            speak('Sorry, I did not catch that. Please try again.');
+        };
+
+        recognition.onaudioend = () => {
+            console.log('Audio capture ended.');
+        };
+
+        recognition.onspeechend = () => {
+            console.log('Speech has stopped being detected');
+            recognition.stop();
+        };
+
+    } else {
+        console.error('Speech Recognition API is not supported in this browser.');
+        speak('Speech Recognition API is not supported in this browser.');
+    }
 });
