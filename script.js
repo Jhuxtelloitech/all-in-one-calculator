@@ -198,10 +198,15 @@ document.getElementById('voiceInputBtn').addEventListener('click', () => {
                 .replace('square', '^2');
 
             console.log(`Parsed Expression: ${spokenExpression}`);
-            input.value += spokenExpression;
+            input.value = spokenExpression;
 
-            // Automatically calculate after each spoken expression
-            calculateExpression(input.value);
+            // Check if the transcript includes 'equals' to calculate immediately
+            if (transcript.includes('equals')) {
+                calculateExpression(input.value);
+            } else {
+                // Provide feedback or handle unrecognized input
+                speak('Please say "equals" to calculate.');
+            }
         };
 
         recognition.onerror = (event) => {
