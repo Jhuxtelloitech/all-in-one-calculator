@@ -162,19 +162,7 @@ document.getElementById('voiceInputBtn').addEventListener('click', () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'en-US';
-        recognition.interimResults = false;
-        recognition.maxAlternatives = 1;
-
         recognition.start();
-
-        recognition.onstart = () => {
-            console.log('Speech recognition service has started');
-            speak('Please start speaking.');
-        };
-
-        recognition.onspeechstart = () => {
-            console.log('Speech has been detected');
-        };
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
@@ -213,11 +201,6 @@ document.getElementById('voiceInputBtn').addEventListener('click', () => {
 
         recognition.onaudioend = () => {
             console.log('Audio capture ended.');
-        };
-
-        recognition.onspeechend = () => {
-            console.log('Speech has stopped being detected');
-            recognition.stop();
         };
 
     } else {
