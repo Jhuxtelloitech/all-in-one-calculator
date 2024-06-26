@@ -187,11 +187,9 @@ document.getElementById('voiceInputBtn').addEventListener('click', () => {
             console.log(`Parsed Expression: ${spokenExpression}`);
             input.value = spokenExpression;
 
-            // Check if the transcript ends with 'equals' to immediately calculate the expression
-            if (transcript.endsWith('equals')) {
+            if (transcript.includes('equals')) {
                 calculateExpression(input.value);
             } else {
-                // Otherwise, speak the parsed expression
                 speak(spokenExpression);
             }
         };
