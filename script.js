@@ -162,10 +162,15 @@ document.getElementById('voiceInputBtn').addEventListener('click', () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'en-US';
+        recognition.continuous = true;  // Allow continuous recognition
+        recognition.interimResults = true;  // Capture partial results
         recognition.start();
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
             console.log(`Transcript: ${transcript}`);
             let spokenExpression = transcript.toLowerCase()
                 .replace('plus', '+')
