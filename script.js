@@ -1,14 +1,19 @@
-let input = document.getElementById('inputBox');
-let buttons = document.querySelectorAll('button');
+// Constants for mathematical constants
 const EN = 2.71828;
 const PI = 3.14159;
+
+// Get input and buttons
+let input = document.getElementById('inputBox');
+let buttons = document.querySelectorAll('button');
 let arr = Array.from(buttons);
 
+// Function to speak text using speech synthesis
 function speak(text) {
     const msg = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(msg);
 }
 
+// Function to calculate the expression
 function calculateExpression(expression) {
     try {
         let result = eval(expression.replaceAll('^', '**').replaceAll('x', '*').replaceAll('÷', '/').replaceAll('e', EN).replaceAll('π', PI));
@@ -21,6 +26,7 @@ function calculateExpression(expression) {
     }
 }
 
+// Function to compute factorial
 function factorial(n) {
     if (n === 0 || n === 1)
         return 1;
@@ -30,6 +36,7 @@ function factorial(n) {
     return n;
 }
 
+// Event listeners for button clicks
 arr.forEach(button => {
     button.addEventListener('click', (e) => {
         let buttonText = e.target.innerHTML.trim();
@@ -148,7 +155,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Audio Guide
+// Audio Guide button functionality
 document.getElementById('audioGuideBtn').addEventListener('click', () => {
     speak(`Welcome to the accessible calculator. To use this calculator, you can click on the buttons or use the following keyboard shortcuts:
         For numbers and basic operations, use the corresponding keys on your keyboard.
@@ -157,41 +164,57 @@ document.getElementById('audioGuideBtn').addEventListener('click', () => {
         Press Enter to calculate the result. Press Backspace to delete the last character, and Escape to clear the input.`);
 });
 
-// Voice Input
+// Voice Input button functionality
 document.getElementById('voiceInputBtn').addEventListener('click', () => {
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-    recognition.lang = 'en-US';
-    recognition.start();
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.continuous = true;  // Allow continuous recognition
+        recognition.interimResults = true;  // Capture partial results
+        recognition.start();
 
-    recognition.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        let spokenExpression = transcript.toLowerCase()
-            .replace('plus', '+')
-            .replace('minus', '-')
-            .replace('multiply by', 'x')
-            .replace('times', 'x')
-            .replace('divide by', '÷')
-            .replace('divided by', '÷')
-            .replace('to the power of', '^')
-            .replace('pi', 'π')
-            .replace('euler\'s number', 'e')
-            .replace('left parenthesis', '(')
-            .replace('right parenthesis', ')')
-            .replace('square root', 'sqrt')
-            .replace('exponential', 'exp')
-            .replace('factorial', '!')
-            .replace('square', '^2');
+        recognition.onresult = (event) => {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript += event.results[i][0].transcript;
+            }
+            console.log(`Transcript: ${transcript}`);
+            
+            let spokenExpression = transcript.toLowerCase()
+                .replace('plus', '+')
+                .replace('minus', '-')
+                .replace('multiply by', 'x')
+                .replace('times', 'x')
+                .replace('divide by', '÷')
+                .replace('divided by', '÷')
+                .replace('to the power of', '^')
+                .replace('pi', 'π')
+                .replace('euler\'s number', 'e')
+                .replace('left parenthesis', '(')
+                .replace('right parenthesis', ')')
+                .replace('square root', 'sqrt')
+                .replace('exponential', 'exp')
+                .replace('factorial', '!')
+                .replace('square', '^2');
 
-        input.value = spokenExpression;
+            console.log(`Parsed Expression: ${spokenExpression}`);
+            input.value += spokenExpression;
 
-        if (transcript.includes('equals')) {
+            // Automatically calculate after each spoken expression
             calculateExpression(input.value);
-        } else {
-            speak(spokenExpression);
-        }
-    };
+        };
 
-    recognition.onerror = (event) => {
-        speak('Sorry, I did not catch that. Please try again.');
-    };
+        recognition.onerror = (event) => {
+            console.error('Speech Recognition Error:', event.error);
+            speak('Sorry, I did not catch that. Please try again.');
+        };
+
+        recognition.onaudioend = () => {
+            console.log('Audio capture ended.');
+        };
+
+    } else {
+        console.error('Speech Recognition API is not supported in this browser.');
+        speak('Speech Recognition API is not supported in this browser.');
+    }
 });
