@@ -1,19 +1,14 @@
-// Constants for mathematical constants
-const EN = 2.71828;
-const PI = 3.14159;
-
-// Get input and buttons
 let input = document.getElementById('inputBox');
 let buttons = document.querySelectorAll('button');
+const EN = 2.71828;
+const PI = 3.14159;
 let arr = Array.from(buttons);
 
-// Function to speak text using speech synthesis
 function speak(text) {
     const msg = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(msg);
 }
 
-// Function to calculate the expression
 function calculateExpression(expression) {
     try {
         let result = eval(expression.replaceAll('^', '**').replaceAll('x', '*').replaceAll('÷', '/').replaceAll('e', EN).replaceAll('π', PI));
@@ -26,7 +21,6 @@ function calculateExpression(expression) {
     }
 }
 
-// Function to compute factorial
 function factorial(n) {
     if (n === 0 || n === 1)
         return 1;
@@ -36,7 +30,6 @@ function factorial(n) {
     return n;
 }
 
-// Event listeners for button clicks
 arr.forEach(button => {
     button.addEventListener('click', (e) => {
         let buttonText = e.target.innerHTML.trim();
@@ -155,7 +148,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Audio Guide button functionality
+// Audio Guide
 document.getElementById('audioGuideBtn').addEventListener('click', () => {
     speak(`Welcome to the accessible calculator. To use this calculator, you can click on the buttons or use the following keyboard shortcuts:
         For numbers and basic operations, use the corresponding keys on your keyboard.
@@ -164,22 +157,16 @@ document.getElementById('audioGuideBtn').addEventListener('click', () => {
         Press Enter to calculate the result. Press Backspace to delete the last character, and Escape to clear the input.`);
 });
 
-// Voice Input button functionality
+// Voice Input
 document.getElementById('voiceInputBtn').addEventListener('click', () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
         recognition.lang = 'en-US';
-        recognition.continuous = true;  // Allow continuous recognition
-        recognition.interimResults = true;  // Capture partial results
         recognition.start();
 
         recognition.onresult = (event) => {
-            let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                transcript += event.results[i][0].transcript;
-            }
+            const transcript = event.results[0][0].transcript;
             console.log(`Transcript: ${transcript}`);
-            
             let spokenExpression = transcript.toLowerCase()
                 .replace('plus', '+')
                 .replace('minus', '-')
@@ -200,12 +187,12 @@ document.getElementById('voiceInputBtn').addEventListener('click', () => {
             console.log(`Parsed Expression: ${spokenExpression}`);
             input.value = spokenExpression;
 
-            // Check if the transcript includes 'equals' to calculate immediately
-            if (transcript.includes('equals')) {
+            // Check if the transcript ends with 'equals' to immediately calculate the expression
+            if (transcript.endsWith('equals')) {
                 calculateExpression(input.value);
             } else {
-                // Provide feedback or handle unrecognized input
-                speak('Please say "equals" to calculate.');
+                // Otherwise, speak the parsed expression
+                speak(spokenExpression);
             }
         };
 
