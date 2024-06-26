@@ -182,12 +182,12 @@ document.getElementById('voiceInputBtn').addEventListener('click', () => {
             .replace('factorial', '!')
             .replace('square', '^2');
 
-        input.value = spokenExpression;
+        input.value = spokenExpression.trim();
 
         if (transcript.includes('equals')) {
             calculateExpression(input.value);
         } else {
-            speak(spokenExpression);
+            speak(transcript);
         }
     };
 
